@@ -35,6 +35,7 @@ namespace xml2csv
 
             if (cmdArgs.ContainsKey("xml") && cmdArgs.ContainsKey("out"))
             {
+                FileInfo fi = new FileInfo(cmdArgs["xml"]);
                 Console.WriteLine("");
                 Console.WriteLine("Input file: " + cmdArgs["xml"]);
                 Console.WriteLine("Ouput file: " + cmdArgs["out"]);
@@ -45,10 +46,13 @@ namespace xml2csv
                 Console.WriteLine("Summary");
                 Console.WriteLine("-------");
                 Console.WriteLine("Input file:                     " + cmdArgs["xml"]);
-                Console.WriteLine("Ouput file:                     " + cmdArgs["out"]);
+                Console.WriteLine("Input file timestamp:           " + fi.LastWriteTime.ToString());
                 Console.WriteLine("Input rows/elements read:       " + inputCount);
                 Console.WriteLine("Conversion errors:              " + errorCount);
+                Console.WriteLine("Ouput file:                     " + cmdArgs["out"]);
                 Console.WriteLine("Geometry data rows exported:    " + count);
+                Console.WriteLine("Conversion timestamp:           " + DateTime.Now.ToString());
+
                 if (cmdArgs.ContainsKey("pause"))
                 {
                     Console.WriteLine("");
@@ -58,14 +62,25 @@ namespace xml2csv
             }
             else
             {
-                Console.WriteLine(@"Usage: archis3-xml2csv.exe --xml=<xml-inputfile> --out=<csv-outputfile>
-Example:
-  archis3-xml2csv.exe --xml=C:\tmp\archis3.xml --out=C:\tmp\archis3.csv
+                Console.WriteLine(@"
+Usage: archis3-xml2csv.exe --xml=<xml-inputfile> --out=<csv-outputfile> [--pause]
 
-Error messages will be displayed in the console. You may redirect the output to a log file as follows:
-  archis3-xml2csv.exe --xml=C:\tmp\archis3.xml --out=C:\tmp\archis3.csv > conversionlog.txt
+Converts some elements of the ARCHIS3 Xml downloads to a csv file, for 
+import in e.g. a GIS. Error messages will be displayed in the console.
+You may redirect the output to a log file as follows, particularly useful
+when doing batch conversion.
 
-Output: csv text file, | (pipe) separated.");
+Output: csv text file, | (pipe) separated.
+
+Examples
+--------
+Convert and wait for exit:
+  archis3-xml2csv.exe --xml=C:\tmp\archis3.xml --out=C:\tmp\archis3.csv --pause
+
+Batch convert and write (append) result to log file:
+  archis3-xml2csv.exe --xml=C:\tmp\archis3.xml --out=C:\tmp\archis3.csv >> conversionlog.txt
+
+");
             }
         }
 
