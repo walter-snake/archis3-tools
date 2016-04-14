@@ -7,8 +7,8 @@
     <ProjectGuid>{B6ADF2FD-A09E-4AD7-89FD-48E96831674B}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>xml2db</RootNamespace>
-    <AssemblyName>xml2db</AssemblyName>
+    <RootNamespace>xml2csv</RootNamespace>
+    <AssemblyName>archis3-xml2csv</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

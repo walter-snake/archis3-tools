@@ -7,7 +7,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
 
-namespace xml2db
+namespace xml2csv
 {
     // --xml=Z:\wouterb\Downloads\attachments\ARCHIS3_Winterswijk_2015_2016.xml --out=C:\tmp\winterswijk.txt
 
@@ -19,21 +19,54 @@ namespace xml2db
         {
             string key;
             string value;
+            int inputCount;
+            int errorCount;
             foreach (string arg in args)
             {
                 key = arg.Split('=')[0].TrimStart('-');
                 value = arg.Substring(arg.IndexOf('=') + 1);
                 cmdArgs.Add(key,value);
             }
-            //Dictionary<string, string> xPaths;
-            //DataTable dt = GetTable(cmdArgs["map"], out xPaths);
-            Console.WriteLine("Archis3 Xml Converter");
-            Console.WriteLine("Input file: " + cmdArgs["xml"]);
-            Console.WriteLine("Error messages");
-            int count = WriteData(cmdArgs["xml"], cmdArgs["out"]);
-            Console.WriteLine("Done, data rows exported: " + count);
-            Console.WriteLine("Output file: " + cmdArgs["out"]);
-            Console.ReadLine();
+            Console.WriteLine("");
+            Console.WriteLine("+-------------------------------+");
+            Console.WriteLine("| Archis3 Xml Converter         |");
+            Console.WriteLine("| (c) Wouter Boasson, RAAP 2016 |");
+            Console.WriteLine("+-------------------------------+");
+
+            if (cmdArgs.ContainsKey("xml") && cmdArgs.ContainsKey("out"))
+            {
+                Console.WriteLine("");
+                Console.WriteLine("Input file: " + cmdArgs["xml"]);
+                Console.WriteLine("Ouput file: " + cmdArgs["out"]);
+                Console.WriteLine("");
+                Console.WriteLine("Starting conversion, error messages:");
+                int count = WriteData(cmdArgs["xml"], cmdArgs["out"], out inputCount, out errorCount);
+                Console.WriteLine("");
+                Console.WriteLine("Summary");
+                Console.WriteLine("-------");
+                Console.WriteLine("Input file:                     " + cmdArgs["xml"]);
+                Console.WriteLine("Ouput file:                     " + cmdArgs["out"]);
+                Console.WriteLine("Input rows/elements read:       " + inputCount);
+                Console.WriteLine("Conversion errors:              " + errorCount);
+                Console.WriteLine("Geometry data rows exported:    " + count);
+                if (cmdArgs.ContainsKey("pause"))
+                {
+                    Console.WriteLine("");
+                    Console.WriteLine("Press a key to exit...");
+                    Console.ReadLine();
+                }
+            }
+            else
+            {
+                Console.WriteLine(@"Usage: archis3-xml2csv.exe --xml=<xml-inputfile> --out=<csv-outputfile>
+Example:
+  archis3-xml2csv.exe --xml=C:\tmp\archis3.xml --out=C:\tmp\archis3.csv
+
+Error messages will be displayed in the console. You may redirect the output to a log file as follows:
+  archis3-xml2csv.exe --xml=C:\tmp\archis3.xml --out=C:\tmp\archis3.csv > conversionlog.txt
+
+Output: csv text file, | (pipe) separated.");
+            }
         }
 
         /// <summary>
@@ -60,7 +93,7 @@ namespace xml2db
             return d;
         }
 
-        static int WriteData(string xmlPath, string outFile)
+        static int WriteData(string xmlPath, string outFile, out int inputCount, out int errorCount)
         {
             // The basics
             string _id;
@@ -70,7 +103,9 @@ namespace xml2db
             string zaakidentificatie;
             string bedrijfsnaam;
             string output;
-            int rowCount = 0;
+            int convCount = 0;
+            inputCount = 0;
+            errorCount = 0;
 
             // Index based lookup of zaakobjecten, file integrity
             int count;
@@ -137,25 +172,33 @@ namespace xml2db
                                 );
                                 // verify row
                                 if (output.ToCharArray().Count(c => c == '|') != 12)
+                                {
                                     Console.WriteLine(String.Format("Invalid row, id: {0}", _id));
+                                    errorCount++;
+                                }
                                 else
                                 {
                                     sw.WriteLine(output);
-                                    rowCount++;
+                                    convCount++;
                                 }
                             }
                             catch (Exception ex)
                             {
                                 Console.WriteLine(String.Format("Missing Xml element in \"zaak id\": {0,-10} {1}", _id, ex.Message.Replace("\r\n", " ")));
+                                errorCount++;
                             }
                         }
                     }
                     else
+                    {
                         Console.WriteLine(String.Format("Zaakobjecten elements do not match, skipped: {0} ({1})", _id, count));
+                        errorCount++;
+                    }
                 }
+                inputCount++;
             }
             sw.Close();
-            return rowCount;
+            return convCount;
         }
     }
 }
